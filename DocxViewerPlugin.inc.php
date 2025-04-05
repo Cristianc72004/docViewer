@@ -6,7 +6,7 @@ use PKP\plugins\GenericPlugin;
 use PKP\plugins\Hook;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\RedirectAction;
-use PKP\core\Application;
+use APP\core\Application;
 use APP\facades\Repo;
 
 class DocxViewerPlugin extends GenericPlugin {

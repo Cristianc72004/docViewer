@@ -2,12 +2,12 @@
 
 namespace APP\plugins\generic\docxViewer;
 
-use PKP\handler\Handler;
+use PKP\core\PKPHandler;
 use APP\facades\Repo;
 use PKP\security\authorization\WorkflowStageAccessPolicy;
 use PKP\file\PrivateFileManager;
 
-class DocxViewerHandler extends Handler {
+class DocxViewerHandler extends PKPHandler {
 
     public function authorize($request, &$args, $roleAssignments) {
         $this->addPolicy(new WorkflowStageAccessPolicy(
