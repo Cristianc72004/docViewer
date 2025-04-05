@@ -2,11 +2,11 @@
 
 namespace APP\plugins\generic\docxViewer;
 
-// Carga necesaria para heredar PKPHandler
 import('lib.pkp.classes.handler.PKPHandler');
 
 use APP\facades\Repo;
 use PKP\file\PrivateFileManager;
+use PKP\template\TemplateManager;
 
 class DocxViewerHandler extends \PKPHandler {
 
@@ -33,10 +33,12 @@ class DocxViewerHandler extends \PKPHandler {
             die('Archivo no disponible en el servidor');
         }
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Disposition: inline; filename="' . basename($filePath) . '"');
-        header('Content-Length: ' . filesize($filePath));
-        readfile($filePath);
-        exit;
+        // Generar URL temporal para el iframe
+        $fileUrl = $request->getBaseUrl() . '/files/' . $submissionFile->getData('path');
+
+        $templateMgr = TemplateManager::getManager($request);
+        $templateMgr->assign('fileUrl', $fileUrl);
+        $templateMgr->assign('fileName', $submissionFile->getLocalizedData('name'));
+        $templateMgr->display(__DIR__ . '/../templates/viewer.tpl');
     }
 }
