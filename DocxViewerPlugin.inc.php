@@ -48,18 +48,38 @@ class DocxViewerPlugin extends GenericPlugin {
         if ($resource !== 'controllers/grid/gridRow.tpl') return false;
     
         $row = $templateMgr->getTemplateVars('row');
-        if (!$row) return false;
+        if (!$row) {
+            error_log("[docxViewer] No se encontró el objeto row");
+            return false;
+        }
     
-        // Solo procesar si la grilla es de archivos de envío
         $gridId = $row->getGridId();
-        if ($gridId !== 'submissionFiles') {
+        $allowedGrids = [
+            'submissionFiles',
+            'grid-files-submission-editorsubmissiondetailsfilesgrid',
+            'grid-files-review-reviewroundsubmissionfilesgrid',
+            'grid-files-production-productionreadyfilesgrid',
+            'grid-files-copyedit-copyeditfilesgrid',
+        ];
+    
+        if (!in_array($gridId, $allowedGrids)) {
             error_log("[docxViewer] Grilla ignorada: $gridId");
             return false;
         }
     
-        $submissionFile = $row->getData();
-        if (!($submissionFile instanceof \PKP\submission\SubmissionFile)) {
-            error_log('[docxViewer] El objeto no es SubmissionFile, ignorado');
+        $data = $row->getData();
+    
+        // ✅ Verificar si es directamente un SubmissionFile
+        if ($data instanceof \PKP\submission\SubmissionFile) {
+            $submissionFile = $data;
+        }
+        // ✅ Si es array, tratar de obtener 'submissionFile'
+        elseif (is_array($data) && isset($data['submissionFile']) && $data['submissionFile'] instanceof \PKP\submission\SubmissionFile) {
+            $submissionFile = $data['submissionFile'];
+        }
+        else {
+            $tipo = is_object($data) ? get_class($data) : gettype($data);
+            error_log("[docxViewer] El objeto no es SubmissionFile, es de tipo: $tipo");
             return false;
         }
     
