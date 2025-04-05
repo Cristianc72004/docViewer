@@ -67,11 +67,11 @@ class DocxViewerPlugin extends GenericPlugin {
         // Ahora detectamos el SubmissionFile en objetos anidados
         $submissionFile = null;
     
-        if ($data instanceof \PKP\submission\SubmissionFile) {
+        if ($data instanceof \PKP\submissionFile\SubmissionFile) {
             $submissionFile = $data;
         } elseif (is_array($data)) {
             foreach ($data as $key => $valor) {
-                if ($valor instanceof \PKP\submission\SubmissionFile) {
+                if ($valor instanceof \PKP\submissionFile\SubmissionFile) {
                     $submissionFile = $valor;
                     error_log("[docxViewer] SubmissionFile encontrado en clave: $key");
                     break;
