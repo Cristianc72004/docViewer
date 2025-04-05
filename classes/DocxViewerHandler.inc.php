@@ -2,33 +2,26 @@
 
 namespace APP\plugins\generic\docxViewer;
 
-// Carga dinámica necesaria para PKPHandler
+// Carga necesaria para heredar PKPHandler
 import('lib.pkp.classes.handler.PKPHandler');
 
 use APP\facades\Repo;
 use PKP\file\PrivateFileManager;
-use PKP\security\authorization\WorkflowStageAccessPolicy;
 
 class DocxViewerHandler extends \PKPHandler {
 
-    public function authorize($request, &$args, $roleAssignments) {
-        $this->addPolicy(new WorkflowStageAccessPolicy(
-            $request,
-            $args,
-            $roleAssignments,
-            'submissionId',
-            (int) $request->getUserVar('stageId')
-        ));
-
-        error_log('[docxViewer] authorize() - submissionId: ' . $request->getUserVar('submissionId') . ', stageId: ' . $request->getUserVar('stageId'));
-        return parent::authorize($request, $args, $roleAssignments);
-    }
-
     public function view($args, $request) {
+        $user = $request->getUser();
+        if (!$user) {
+            error_log('[docxViewer] Usuario no autenticado. Acceso denegado.');
+            die('Acceso no autorizado');
+        }
+
         $submissionFileId = (int) $request->getUserVar('submissionFileId');
         $submissionFile = Repo::submissionFile()->get($submissionFileId);
 
         if (!$submissionFile) {
+            error_log('[docxViewer] Archivo no encontrado con ID=' . $submissionFileId);
             die('Archivo no encontrado');
         }
 
@@ -36,6 +29,7 @@ class DocxViewerHandler extends \PKPHandler {
         $filePath = $fileManager->getBasePath() . DIRECTORY_SEPARATOR . $submissionFile->getData('path');
 
         if (!file_exists($filePath)) {
+            error_log('[docxViewer] Archivo no existe en el servidor: ' . $filePath);
             die('Archivo no disponible en el servidor');
         }
 
