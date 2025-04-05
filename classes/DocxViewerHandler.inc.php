@@ -3,10 +3,10 @@
 namespace APP\plugins\generic\docxViewer;
 
 import('lib.pkp.classes.handler.PKPHandler');
+import('classes.template.TemplateManager'); // ✅ esta es la correcta
 
 use APP\facades\Repo;
 use PKP\file\PrivateFileManager;
-use PKP\template\TemplateManager;
 
 class DocxViewerHandler extends \PKPHandler {
 
@@ -33,12 +33,13 @@ class DocxViewerHandler extends \PKPHandler {
             die('Archivo no disponible en el servidor');
         }
 
-        // Generar URL temporal para el iframe
         $fileUrl = $request->getBaseUrl() . '/files/' . $submissionFile->getData('path');
 
-        $templateMgr = TemplateManager::getManager($request);
+        // 👇 Esto es correcto
+        $templateMgr = \TemplateManager::getManager($request);
         $templateMgr->assign('fileUrl', $fileUrl);
         $templateMgr->assign('fileName', $submissionFile->getLocalizedData('name'));
-        $templateMgr->display(__DIR__ . '/../templates/viewer.tpl');
+        $templateMgr->display($this->getTemplateResource('viewer.tpl'));
+        
     }
 }
