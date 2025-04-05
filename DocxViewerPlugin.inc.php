@@ -49,43 +49,50 @@ class DocxViewerPlugin extends GenericPlugin {
     
         $row = $templateMgr->getTemplateVars('row');
         if (!$row) {
-            error_log("[docxViewer] No se encontró el objeto row");
+            error_log('[docxViewer] No se encontró la variable row');
             return false;
         }
     
         $gridId = $row->getGridId();
-        $allowedGrids = [
-            'submissionFiles',
-            'grid-files-submission-editorsubmissiondetailsfilesgrid',
-            'grid-files-review-reviewroundsubmissionfilesgrid',
-            'grid-files-production-productionreadyfilesgrid',
-            'grid-files-copyedit-copyeditfilesgrid',
-        ];
-    
-        if (!in_array($gridId, $allowedGrids)) {
+        if (!str_contains($gridId, 'grid-files-')) {
             error_log("[docxViewer] Grilla ignorada: $gridId");
             return false;
         }
     
         $data = $row->getData();
     
-        // ✅ Verificar si es directamente un SubmissionFile
+        // 📦 Registro completo del contenido del row
+        error_log('[docxViewer] Contenido completo de row->getData(): ' . print_r($data, true));
+    
+        // Ahora detectamos el SubmissionFile en objetos anidados
+        $submissionFile = null;
+    
         if ($data instanceof \PKP\submission\SubmissionFile) {
             $submissionFile = $data;
+        } elseif (is_array($data)) {
+            foreach ($data as $key => $valor) {
+                if ($valor instanceof \PKP\submission\SubmissionFile) {
+                    $submissionFile = $valor;
+                    error_log("[docxViewer] SubmissionFile encontrado en clave: $key");
+                    break;
+                } elseif (is_object($valor)) {
+                    error_log("[docxViewer] Valor en $key es objeto de tipo: " . get_class($valor));
+                } else {
+                    error_log("[docxViewer] Valor en $key es de tipo: " . gettype($valor));
+                }
+            }
+        } else {
+            error_log("[docxViewer] Tipo raíz inesperado: " . gettype($data));
         }
-        // ✅ Si es array, tratar de obtener 'submissionFile'
-        elseif (is_array($data) && isset($data['submissionFile']) && $data['submissionFile'] instanceof \PKP\submission\SubmissionFile) {
-            $submissionFile = $data['submissionFile'];
-        }
-        else {
-            $tipo = is_object($data) ? get_class($data) : gettype($data);
-            error_log("[docxViewer] El objeto no es SubmissionFile, es de tipo: $tipo");
+    
+        if (!$submissionFile) {
+            error_log('[docxViewer] No se encontró ningún SubmissionFile');
             return false;
         }
     
         $mimeType = strtolower($submissionFile->getData('mimetype'));
         if ($mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            error_log("[docxViewer] Archivo con MIME no soportado: $mimeType");
+            error_log("[docxViewer] MIME no soportado: $mimeType");
             return false;
         }
     
@@ -107,8 +114,7 @@ class DocxViewerPlugin extends GenericPlugin {
             'preview'
         ));
     
-        error_log("[docxViewer] Botón agregado para archivo {$submissionFile->getId()}");
-    
+        error_log("[docxViewer] Botón agregado para archivo ID={$submissionFile->getId()}");
         return false;
     }
     
