@@ -1,19 +1,30 @@
 <?php
 
-import('classes.handler.Handler');
-import('lib.pkp.classes.file.PrivateFileManager');
+namespace APP\plugins\generic\docxViewer;
+
+use PKP\handler\Handler;
+use APP\facades\Repo;
+use PKP\security\authorization\WorkflowStageAccessPolicy;
+use PKP\file\PrivateFileManager;
 
 class DocxViewerHandler extends Handler {
-    function authorize($request, &$args, $roleAssignments) {
-        import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
-        $this->addPolicy(new WorkflowStageAccessPolicy($request, $args, $roleAssignments, 'submissionId', (int) $request->getUserVar('stageId')));
+
+    public function authorize($request, &$args, $roleAssignments) {
+        $this->addPolicy(new WorkflowStageAccessPolicy(
+            $request, $args, $roleAssignments,
+            'submissionId',
+            (int) $request->getUserVar('stageId')
+        ));
         return parent::authorize($request, $args, $roleAssignments);
     }
 
-    function view($args, $request) {
+    public function view($args, $request) {
         $submissionFileId = (int) $request->getUserVar('submissionFileId');
-        $submissionFile = Services::get('submissionFile')->get($submissionFileId);
-        if (!$submissionFile) die('Archivo no encontrado');
+        $submissionFile = Repo::submissionFile()->get($submissionFileId);
+
+        if (!$submissionFile) {
+            die('Archivo no encontrado');
+        }
 
         $fileManager = new PrivateFileManager();
         $filePath = $fileManager->getBasePath() . DIRECTORY_SEPARATOR . $submissionFile->getData('path');

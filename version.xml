@@ -3,8 +3,8 @@
 <version>
     <application>docxViewer</application>
     <type>plugins.generic</type>
-    <release>1.0.4.0</release>
-    <date>2025-04-01</date>
-    <class>DocxViewerPlugin</class>
+    <release>1.0.4.1</release>
+    <date>2025-04-04</date>
+    <class>APP\plugins\generic\docxViewer\DocxViewerPlugin</class>
     <lazy-load>1</lazy-load>
 </version>

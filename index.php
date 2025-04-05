@@ -1,3 +1,5 @@
 <?php
+
 require_once('DocxViewerPlugin.inc.php');
-return new DocxViewerPlugin();
+
+return new APP\plugins\generic\docxViewer\DocxViewerPlugin();
