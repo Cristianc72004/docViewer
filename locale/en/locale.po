@@ -6,9 +6,3 @@ msgstr "Allows viewing DOCX files directly from local server."
 
 msgid "plugins.generic.docxViewer.button.viewDocx"
 msgstr "View DOCX"
-
-msgid "plugins.generic.docxViewer.fileNotFound"
-msgstr "File not found."
-
-msgid "plugins.generic.docxViewer.fileMissing"
-msgstr "File missing on server."
