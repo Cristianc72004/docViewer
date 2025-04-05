@@ -2,16 +2,26 @@
 
 namespace APP\plugins\generic\docxViewer;
 
-use PKP\handler\PKPHandler;
+// Carga la clase base del handler
+import('lib.pkp.classes.handler.PKPHandler');
+
 use APP\facades\Repo;
-use PKP\security\authorization\WorkflowStageAccessPolicy;
+use PKP\security\authorization\ContextAccessPolicy;
 use PKP\file\PrivateFileManager;
 
-class DocxViewerHandler extends PKPHandler {
+class DocxViewerHandler extends \PKPHandler {
 
     public function authorize($request, &$args, $roleAssignments) {
-        import('lib.pkp.classes.security.authorization.ContextAccessPolicy');
-        $this->addPolicy(new \PKP\security\authorization\ContextAccessPolicy($request, $roleAssignments));
+        import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
+    
+        $this->addPolicy(new \PKP\security\authorization\WorkflowStageAccessPolicy(
+            $request,
+            $args,
+            $roleAssignments,
+            'submissionId', // El nombre de la variable en la URL
+            (int) $request->getUserVar('stageId') // valor stageId (ej. 1, 2, 3)
+        ));
+    
         return parent::authorize($request, $args, $roleAssignments);
     }
     
