@@ -16,30 +16,34 @@ class DocxViewerHandler extends \PKPHandler {
             error_log('[docxViewer] Usuario no autenticado. Acceso denegado.');
             die('Acceso no autorizado');
         }
-
+    
         $submissionFileId = (int) $request->getUserVar('submissionFileId');
         $submissionFile = Repo::submissionFile()->get($submissionFileId);
-
+    
         if (!$submissionFile) {
             error_log('[docxViewer] Archivo no encontrado con ID=' . $submissionFileId);
             die('Archivo no encontrado');
         }
-
-        $fileManager = new PrivateFileManager();
+    
+        $fileManager = new \PKP\file\PrivateFileManager();
         $filePath = $fileManager->getBasePath() . DIRECTORY_SEPARATOR . $submissionFile->getData('path');
-
+    
         if (!file_exists($filePath)) {
             error_log('[docxViewer] Archivo no existe en el servidor: ' . $filePath);
             die('Archivo no disponible en el servidor');
         }
-
+    
+        // Construir la URL pública para Office Viewer (¡debe estar expuesto el folder /files!)
         $fileUrl = $request->getBaseUrl() . '/files/' . $submissionFile->getData('path');
-
-        // 👇 Esto es correcto
+    
         $templateMgr = \TemplateManager::getManager($request);
         $templateMgr->assign('fileUrl', $fileUrl);
         $templateMgr->assign('fileName', $submissionFile->getLocalizedData('name'));
-        $templateMgr->display($this->getTemplateResource('viewer.tpl'));
-        
+    
+        // Cargar el plugin correctamente
+        $this->plugin = \PluginRegistry::getPlugin('generic', 'docxviewer');
+        $templateMgr->display($this->plugin->getTemplatePath() . 'viewer.tpl');
     }
+    
+    
 }
