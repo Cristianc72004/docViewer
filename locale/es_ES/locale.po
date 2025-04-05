@@ -1,0 +1,8 @@
+msgid "plugins.generic.docxViewer.displayName"
+msgstr "Plugin de Visor de DOCX"
+
+msgid "plugins.generic.docxViewer.description"
+msgstr "Permite visualizar archivos DOCX directamente desde el servidor local."
+
+msgid "plugins.generic.docxViewer.button.viewDocx"
+msgstr "Visualizar DOCX"
