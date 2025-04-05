@@ -1,25 +1,33 @@
 <?php
+namespace APP\plugins\generic\docxViewer\classes;
 
-import('classes.handler.Handler');
-import('lib.pkp.classes.file.PrivateFileManager');
+use PKP\core\PKPApplication;
+use PKP\handler\PKPHandler;
+use APP\facades\Repo;
+use PKP\file\PrivateFileManager;
+use PKP\security\authorization\WorkflowStageAccessPolicy;
 
-class DocxViewerHandler extends Handler {
-    function authorize($request, &$args, $roleAssignments) {
-        import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
-        $this->addPolicy(new WorkflowStageAccessPolicy($request, $args, $roleAssignments, 'submissionId', (int) $request->getUserVar('stageId')));
+class DocxViewerHandler extends PKPHandler {
+
+    public function authorize($request, &$args, $roleAssignments) {
+        $this->addPolicy(new WorkflowStageAccessPolicy(
+            $request, $args, $roleAssignments, 'submissionId', (int) $request->getUserVar('stageId')
+        ));
         return parent::authorize($request, $args, $roleAssignments);
     }
 
-    function view($args, $request) {
+    public function view($args, $request) {
         $submissionFileId = (int) $request->getUserVar('submissionFileId');
-        $submissionFile = Services::get('submissionFile')->get($submissionFileId);
-        if (!$submissionFile) die('Archivo no encontrado');
+        $submissionFile = Repo::submissionFile()->get($submissionFileId);
 
-        $fileManager = new PrivateFileManager();
-        $filePath = $fileManager->getBasePath() . DIRECTORY_SEPARATOR . $submissionFile->getData('path');
+        if (!$submissionFile) {
+            die(__('plugins.generic.docxViewer.fileNotFound'));
+        }
+
+        $filePath = (new PrivateFileManager())->getBasePath() . DIRECTORY_SEPARATOR . $submissionFile->getData('path');
 
         if (!file_exists($filePath)) {
-            die('Archivo no disponible en el servidor');
+            die(__('plugins.generic.docxViewer.fileMissing'));
         }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
