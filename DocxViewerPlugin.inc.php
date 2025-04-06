@@ -34,12 +34,13 @@ class DocxViewerPlugin extends GenericPlugin {
     public function callbackLoadHandler($hookName, $args) {
         if ($args[0] === 'docxViewer' && $args[1] === 'view') {
             require_once($this->getPluginPath() . '/classes/DocxViewerHandler.inc.php');
+            DocxViewerHandler::$pluginInstance = $this; // ✅ Aquí pasamos la instancia
             define('HANDLER_CLASS', 'APP\\plugins\\generic\\docxViewer\\DocxViewerHandler');
-            error_log('[docxViewer] Handler cargado correctamente');
             return true;
         }
         return false;
     }
+    
 
     public function addViewButton($hookName, $params) {
         $templateMgr = $params[0];
